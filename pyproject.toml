@@ -1,0 +1,16 @@
+[project]
+name = "inferperf"
+version = "1.0.0"
+description = "Lightweight PMU-driven performance analysis for ML workloads"
+requires-python = ">=3.8"
+dependencies = [
+    "rich",
+    "click"
+]
+
+[tool.setuptools]
+packages = ["inferperf"]
+
+[project.scripts]
+inferperf = "inferperf.cli:main"
+

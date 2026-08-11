@@ -1,0 +1,5 @@
+.venv/
+.inferperf_cache.toml
+config.toml
+__pycache__/
+*.pyc

@@ -1,0 +1,3 @@
+[submodule "inferperf/utils/flamegraph_scipts/FlameGraph"]
+	path = inferperf/utils/flamegraph_scipts/FlameGraph
+	url = https://github.com/brendangregg/FlameGraph.git
