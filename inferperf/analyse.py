@@ -133,6 +133,13 @@ def render_metrics(pmu):
     table.add_row("instructions", r_int(pmu.get("instructions")))
     table.add_row("ipc", r3(pmu.get("ipc")))
 
+    #Tokens
+    table.add_row("", "")
+    table.add_row("[bold white]Per-Token Efficiency[/bold white]", "")
+    table.add_row("tokens", r_int(pmu.get("tokens")))
+    table.add_row("cycles_per_token", r_int(pmu.get("cycles_per_token")))
+    table.add_row("instructions_per_token", r_int(pmu.get("instructions_per_token")))
+
     # Memory
     table.add_row("", "")
     table.add_row("[bold white]Memory Indicators[/bold white]", "")
@@ -300,11 +307,34 @@ def run_analyse(workload, args):
         "workload_file": workload_path,
         "workload_args": args,
         "input_shape": getattr(args, "input_shape", "unknown"),
-        "batch_size": getattr(args, "batch_size", "unknown"),
+
+        # temporary placeholders
+        "batch_size": None,
+        "sequence_length": None,
+        "tokens": None,
 
         "perf_events": EVENTS,
         "perf_command": pmu_result.get("perf_command", "unknown"),
     }
+
+    # Extract batch/sequence from workload module
+    batch = getattr(workload, "BATCH_SIZE", None)
+    seq = getattr(workload, "SEQUENCE_LENGTH", None)
+
+    metadata["batch_size"] = batch
+    metadata["sequence_length"] = seq
+
+    if batch and seq:
+        metadata["tokens"] = batch * seq
+
+    tokens = metadata["tokens"]
+    if tokens:
+        pmu["tokens"] = tokens
+        pmu["cycles_per_token"] = pmu["cycles"] / tokens
+        pmu["instructions_per_token"] = pmu["instructions"] / tokens
+
+
+
 
     # 6. Assemble final output
     data = {

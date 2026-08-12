@@ -1,6 +1,9 @@
 import onnxruntime as ort
 import numpy as np
 
+BATCH_SIZE = 4
+SEQUENCE_LENGTH = 512
+
 def run():
     session = ort.InferenceSession(
         "/home/pi/projects/inferperf-src/inferperf/models/minilm-l12.onnx",
@@ -12,17 +15,14 @@ def run():
     attention_name = inputs[1].name
     token_type_name = inputs[2].name
 
-    batch = 4
-    seq_len = 512 
-
     # Irregular token IDs
-    input_ids = np.random.randint(0, 30000, size=(batch, seq_len)).astype(np.int64)
+    input_ids = np.random.randint(0, 30000, size=(BATCH_SIZE, SEQUENCE_LENGTH)).astype(np.int64)
 
     # Irregular attention mask
-    attention_mask = np.random.randint(0, 2, size=(batch, seq_len)).astype(np.int64)
+    attention_mask = np.random.randint(0, 2, size=(BATCH_SIZE, SEQUENCE_LENGTH)).astype(np.int64)
 
     # Token type IDs
-    token_type_ids = np.zeros((batch, seq_len), dtype=np.int64)
+    token_type_ids = np.zeros((BATCH_SIZE, SEQUENCE_LENGTH), dtype=np.int64)
 
     session.run(
         None,

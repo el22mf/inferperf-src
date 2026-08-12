@@ -2,17 +2,17 @@ import onnxruntime as ort
 import numpy as np
 
 # Preallocate everything once at module load
-batch = 1
-seq_len = 128
+BATCH_SIZE = 1
+SEQUENCE_LENGTH = 128
 
 # Regular token IDs (prefetcher-friendly)
-input_ids = np.ones((batch, seq_len), dtype=np.int64)
+input_ids = np.ones((BATCH_SIZE, SEQUENCE_LENGTH), dtype=np.int64)
 
 # Regular attention mask (branch-predictor-friendly)
-attention_mask = np.ones((batch, seq_len), dtype=np.int64)
+attention_mask = np.ones((BATCH_SIZE, SEQUENCE_LENGTH), dtype=np.int64)
 
 # Token type IDs (preallocated)
-token_type_ids = np.zeros((batch, seq_len), dtype=np.int64)
+token_type_ids = np.zeros((BATCH_SIZE, SEQUENCE_LENGTH), dtype=np.int64)
 
 # Create session once
 session = ort.InferenceSession(

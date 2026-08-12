@@ -70,6 +70,9 @@ SEMANTIC_RULES = {
     "ipc": "higher_is_good",
     "cycles": "higher_is_bad",
     "instructions": "neutral",
+    "tokens": "neutral",
+    "cycles_per_token": "higher_is_bad",
+    "instructions_per_token": "higher_is_bad",
     "cache_miss_rate": "higher_is_bad",
     "l1d_rate": "higher_is_bad",
     "l2d_rate": "higher_is_bad",
@@ -128,6 +131,11 @@ def render_side_by_side(A, B, metaA, metaB):
         ("instructions", "instructions", None),
         ("ipc", "ipc", None),
 
+        # Per-token Efficiency
+        ("tokens", "tokens", "Per-Token Efficiency"),
+        ("cycles_per_token", "cycles_per_token", None),
+        ("instructions_per_token", "instructions_per_token", None),
+
         ("cache_misses", "cache_misses", "Memory Indicators"),
         ("cache_miss_rate", "cache_miss_rate", None),
         ("l1d_refill", "l1d_refill", None),
@@ -164,11 +172,11 @@ def render_side_by_side(A, B, metaA, metaB):
             b_str = format_pct(b)
             delta_pp = (b - a) * 100
             threshold = PP_THRESHOLDS.get(key, 0.10)
-            delta_str = f"[bold]{colour_semantic(key, delta_pp, threshold)}[/bold]"
+            delta_str = f"[bold]{colour_semantic(key, delta_pp, threshold)}%[/bold]"
         else:
-            a_str = f"{a:,}"
-            b_str = f"{b:,}"
-            delta_int = b - a
+            a_str = f"{int(a):,}"
+            b_str = f"{int(b):,}"
+            delta_int = int(b) - int(a)
             threshold = INT_THRESHOLDS.get(key, 500_000)
             delta_str = f"[bold]{colour_semantic_int(key, delta_int, threshold)}[/bold]"
 
@@ -262,6 +270,8 @@ def run_compare():
     print("\nSelect Workload B:\n")
     workloadB = normalize_workload_path(workload_selection_menu())
 
+
+
     # 2. Warmup if chosen
     warm = input("\nWarm-up runs [0–3]: ").strip()
     if warm not in ("0", "1", "2", "3"):
@@ -271,6 +281,15 @@ def run_compare():
     # 3. Load workloads
     wA = load_workload(workloadA)
     wB = load_workload(workloadB)
+
+    # Extract token metadata from workloads
+    batchA = getattr(wA, "BATCH_SIZE", None)
+    seqA = getattr(wA, "SEQUENCE_LENGTH", None)
+    tokensA = batchA * seqA if batchA and seqA else None
+
+    batchB = getattr(wB, "BATCH_SIZE", None)
+    seqB = getattr(wB, "SEQUENCE_LENGTH", None)
+    tokensB = batchB * seqB if batchB and seqB else None
 
     # Warmup + Perf A
     if warmup > 0:
@@ -291,6 +310,17 @@ def run_compare():
 
     console.print("[cyan]Running PMU for Workload B...[/cyan]")
     pmuB = run_pmu(workloadB, []).get("pmu", {})
+
+    # Per-token metrics
+    if tokensA:
+        pmuA["tokens"] = tokensA
+        pmuA["cycles_per_token"] = pmuA["cycles"] / tokensA
+        pmuA["instructions_per_token"] = pmuA["instructions"] / tokensA
+
+    if tokensB:
+        pmuB["tokens"] = tokensB
+        pmuB["cycles_per_token"] = pmuB["cycles"] / tokensB
+        pmuB["instructions_per_token"] = pmuB["instructions"] / tokensB
 
 
     # 4. Classification

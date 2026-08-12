@@ -140,6 +140,11 @@ def render_side_by_side(baseline, current, baseline_meta, current_meta):
         ("instructions", "instructions", None),
         ("ipc", "ipc", None),
 
+        # Per-token Efficiency
+        ("tokens", "tokens", "Per-Token Efficiency"),
+        ("cycles_per_token", "cycles_per_token", None),
+        ("instructions_per_token", "instructions_per_token", None),
+
         # Memory Indicators
         ("cache_misses", "cache_misses", "Memory Indicators"),
         ("cache_miss_rate", "cache_miss_rate", None),
@@ -184,14 +189,14 @@ def render_side_by_side(baseline, current, baseline_meta, current_meta):
                 c_str = format_pct(c)
                 delta_pp = (c - b) * 100
                 threshold = PP_THRESHOLDS.get(key, 0.10)
-                delta_str = f"[bold]{colour_semantic(key, delta_pp, threshold)}[/bold]"
+                delta_str = f"[bold]{colour_semantic(key, delta_pp, threshold)}%[/bold]"
 
 
             # integer metrics
             else:
-                b_str = f"{b:,}"
-                c_str = f"{c:,}"
-                delta_int = c - b
+                b_str = f"{int(b):,}"
+                c_str = f"{int(c):,}"
+                delta_int = int(c) - int(b)
                 threshold = INT_THRESHOLDS.get(key, 500_000)
                 delta_str = f"[bold]{colour_semantic_int(key, delta_int, threshold)}[/bold]"
 
@@ -307,6 +312,7 @@ def run_validate():
         "all_bottlenecks": cache.get("all_bottlenecks", [])
     }
     baseline_metadata = cache.get("metadata", {})
+    baseline_tokens = baseline_metadata.get("tokens", None)
 
     # 2. Display baseline summary
     if RICH_AVAILABLE:
@@ -365,6 +371,12 @@ def run_validate():
     except Exception as e:
         print(f"Failed to run PMU on workload {baseline_workload}: {e}")
         return 6
+
+    # Compute per-token metrics for current run using baseline token count
+    if baseline_tokens:
+        current_pmu["tokens"] = baseline_tokens
+        current_pmu["cycles_per_token"] = current_pmu["cycles"] / baseline_tokens
+        current_pmu["instructions_per_token"] = current_pmu["instructions"] / baseline_tokens
 
     # 5. Classify current run
     current_classification = classify_bottleneck(current_pmu)
