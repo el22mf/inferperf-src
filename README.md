@@ -90,8 +90,7 @@ The `analyse.py` command produces a detailed diagnostic view combining PMU metri
 
 ## PMU Interpretation: Recommendations and Flamegraphs
 
-InferPerf does more than collect PMU counters — it interprets them.  
-The recommendations system is built on a set of semantic rules that map PMU behaviour to likely microarchitectural inefficiencies. For example:
+InferPerf does more than collect PMU counters - it interprets them. The recommendations system is built on a set of semantic rules that map PMU behaviour to likely microarchitectural inefficiencies. For example:
 
 - high `branch_miss_rate` → unstable control flow or non‑deterministic inputs  
 - high `l1d_refill` / `l2d_refill` → poor locality or oversized working set  
@@ -109,9 +108,9 @@ InferPerf also generates a flamegraph for every run. PMU counters tell you *what
 
 InferPerf ships with two **demonstration workloads** to show how the toolkit detects bottlenecks, classifies behaviour, and validates improvements:
 
-- `mobilenetv2.py` — MobileNetV2 inference  
-- `transformer_encoder.py` — MiniLM‑L12 baseline (batch 4, seq 512)  
-- `transformer_encoder_optimised.py` — Optimised transformer (batch 1, seq 128)
+- `mobilenetv2.py` - MobileNetV2 inference  
+- `transformer_encoder.py` - MiniLM‑L12 baseline (batch 4, seq 512)  
+- `transformer_encoder_optimised.py` - Optimised transformer (batch 1, seq 128)
 
 `mobilenetv2.py` exists as a validation of the tool, particularly during the generation of the `analyse.py` and `validate.py` scripts. `transformer_encoder_optimised.py`
 is an optimised version of `transformer_encoder.py`, which was produced following the recommendations provided by the InferPerf toolkit. These two scripts
@@ -183,8 +182,7 @@ InferPerf is intended to complement Arm Performix, rather than compete with it. 
 
 ## Appendix — PMU Events and Cache Schema
 
-InferPerf exposes a small, stable data model that other tools or workflows can build on.  
-This appendix documents the **formal interface** of the toolkit: the PMU event set it guarantees to collect, and the structure of the baseline cache used for reproducible validation and comparison.
+InferPerf exposes a small, stable data model that other tools or workflows can build on. This appendix documents the **formal interface** of the toolkit: the PMU event set it guarantees to collect, and the structure of the baseline cache used for reproducible validation and comparison.
 
 ### PMU event set
 InferPerf standardises on a minimal, Arm‑portable `perf` event set that is available across Cortex‑A devices.  The goal of this is to promote consistent behaviour across as many different platforms as possible.
@@ -194,8 +192,7 @@ InferPerf standardises on a minimal, Arm‑portable `perf` event set that is ava
 These events form the core of InferPerf’s bottleneck classifier (IPC, memory locality, branch stability, TLB behaviour).
 
 ### Baseline cache schema
-InferPerf stores analysis results in a structured cache so future runs can be validated deterministically.  
-This schema is intentionally simple, making it easy to inspect, diff, or integrate into external tooling.
+InferPerf stores analysis results in a structured cache so future runs can be validated deterministically. This schema is intentionally simple, making it easy to inspect, diff, or integrate into external tooling.
 
 - **workload_name** - identifier for the workload  
 - **timestamp** - when the baseline was generated  
