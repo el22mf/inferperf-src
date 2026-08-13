@@ -23,7 +23,7 @@ InferPerf is a profiling toolkit that converts hardware-based performance counte
 
 ## Quick summary
 
-InferPerf provides a structured way to understand why an AI workload behaves the way it does on Arm CPUs. Instead of treating perf output and flamegraphs as raw data, InferPerf turns them into a reproducible performance baseline, a bottleneck classification, and clear optimisation guidance. The included transformer encoder example demonstrates this workflow in action, showing how InferPerf can reveal inefficiencies and validate improvements such as the +20.53 IPC uplift seen later in this README.
+InferPerf provides a structured way to understand why an AI workload behaves the way it does on Arm CPUs. It turns raw data from perf output into a reproducible performance baseline, a bottleneck classification, and clear optimisation guidance, with flamegraph generation. The included transformer encoder example demonstrates this workflow in action, showing how InferPerf can reveal inefficiencies and validate improvements such as the +20.53 IPC uplift seen later in this README.
 
 ---
 
