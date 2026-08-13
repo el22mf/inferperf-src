@@ -76,6 +76,18 @@ Running `inferperf analyse` or `inferperf compare` without arguments opens a gui
 
 *Example of guided selection menu prompt for the command `inferperf analyse`*
 
+---
+
+## Interface Overview
+
+The `analyse.py` command produces a detailed diagnostic view combining PMU metrics, bottleneck classification, and optimisation recommendations.   The `validate.py` and `compare.py` commands produce similar outputs displaying PMU metrics across varying workloads.
+
+<img width="452" height="561" alt="image" src="https://github.com/user-attachments/assets/97f99cdc-16da-4b12-90ea-d1e9d8c16c07" />
+
+*Example output from `inferperf analyse` showing PMU metrics, bottleneck classification, recommendations, and available actions.*
+
+---
+
 ## Workloads and Models
 
 InferPerf ships with two **demonstration workloads** to show how the toolkit detects bottlenecks, classifies behaviour, and validates improvements:
@@ -102,6 +114,8 @@ inferperf compare transformer_encoder transformer_encoder_optimised --warmup 3
 ```
 
 <img width="600" height="390" alt="image" src="https://github.com/user-attachments/assets/f864a166-fea1-46f2-9d73-2674724008fd" />
+
+*Output showing results of `compare,py` for the two demonstration workloads*
 
 The optimisation in the demonstration workload falls into two areas:
 
