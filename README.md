@@ -31,12 +31,12 @@ InferPerf provides a structured way to understand why an AI workload behaves the
 
 ```bash
 git clone <repo>
-cd inferperf
+cd inferperf-src
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
 # Baseline profile
-inferperf analyse transformer_encoder --warmup 3
+inferperf analyse mobilenetv2 --warmup 3
 ```
 
 ---
@@ -68,6 +68,13 @@ inferperf compare transformer_encoder transformer_encoder_optimised --warmup 3
 ```
 
 ---
+## Optional interactive mode
+InferPerf also includes an interactive mode for users who prefer not to specify workloads or warmup counts on the command line.
+Running `inferperf analyse` or `inferperf compare` without arguments opens a guided selection menu.
+
+<img width="600" height="160" alt="image" src="https://github.com/user-attachments/assets/99ba2ddf-34b5-4144-a1eb-15e2cfc53f53" />
+
+*Example of guided selection menu prompt for the command `inferperf analyse`*
 
 ## Workloads and Models
 
@@ -88,13 +95,18 @@ Included ONNX models:
 
 ---
 
-## Optimisation Impact via Demonstration Workload
+## Demonstration: Transformer Encoder Optimisation
+The following demonstration can be produced using the single commmand:
+```bash
+inferperf compare transformer_encoder transformer_encoder_optimised --warmup 3
+```
 
 <img width="600" height="390" alt="image" src="https://github.com/user-attachments/assets/f864a166-fea1-46f2-9d73-2674724008fd" />
 
-**(a) Workload reduction: 2048 → 128 tokens (16× fewer).**  
-**(b) Execution‑level optimisations: +20.53 IPC uplift and large absolute reductions in cache, TLB, and branch misses.**
+The optimisation in the demonstration workload falls into two areas:
 
+- **Working‑set reduction**: 2048 → 128 tokens (16× fewer)
+- **Execution‑level improvements**: +20.53 IPC uplift and large reductions in cache, TLB, and branch misses
 
 | Category | What changed | Why it matters |
 |----------|--------------|----------------|
@@ -102,30 +114,10 @@ Included ONNX models:
 | **Execution‑level** | deterministic inputs, preallocation, persistent session, hot‑path minimisation | improves per‑token efficiency, IPC, locality, and branch predictor stability |
 
 
+InferPerf identifies **execution-level** inefficiencies such as unstable branch behaviour, allocator churn, repeated runtime initialisation, and non-deterministic inputs. In the demonstration workload, these surfaced as recommendations like deterministic token IDs, deterministic attention masks, tensor preallocation, persistent ONNX Runtime sessions, cached input dictionaries, removal of randomness, and hot-path minimisation. These are examples of the kinds of fixes InferPerf guides engineers toward, and they are what drive the IPC uplift and the reductions in cache, TLB, and branch misses shown in the screenshot.
+
+
 **Note:** The per‑token values shown in the screenshot naturally rise in the optimised workload because it processes 16× fewer tokens, meaning fixed ONNX Runtime overhead is divided by a much smaller token count. This behaviour is expected and not a regression; the meaningful efficiency indicator is IPC, which increases substantially in the optimised run.
-
-
-### Execution-Level Optimisations
-
-InferPerf identifies execution-level inefficiencies such as unstable branch behaviour, allocator churn, repeated runtime initialisation, and non-deterministic inputs. In the demonstration workload, these surfaced as recommendations like deterministic token IDs, deterministic attention masks, tensor preallocation, persistent ONNX Runtime sessions, cached input dictionaries, removal of randomness, and hot-path minimisation. These are examples of the kinds of fixes InferPerf guides engineers toward, and they are what drive the IPC uplift and the reductions in cache, TLB, and branch misses shown in the screenshot.
-
----
-
-## Demonstration Reproduction
-
-```bash
-# Baseline profile and cache
-inferperf analyse transformer_encoder --warmup 3
-
-# Optimised profile and cache (for ease of demonstration, validate.py is tested on the same script
-inferperf validate
-
-# Compare the two saved baselines
-inferperf compare workloadA workloadB
-
-# Validate candidate against baseline
-inferperf validate workloadA workloadB --warmup 3
-```
 
 ---
 
