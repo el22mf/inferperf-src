@@ -88,6 +88,23 @@ The `analyse.py` command produces a detailed diagnostic view combining PMU metri
 
 ---
 
+## PMU Interpretation: Recommendations and Flamegraphs
+
+InferPerf does more than collect PMU counters — it interprets them.  
+The recommendations system is built on a set of semantic rules that map PMU behaviour to likely microarchitectural inefficiencies. For example:
+
+- high `branch_miss_rate` → unstable control flow or non‑deterministic inputs  
+- high `l1d_refill` / `l2d_refill` → poor locality or oversized working set  
+- high `dtlb_misses` → irregular memory access patterns  
+- low IPC with high instructions → Python overhead or fragmented execution  
+- low IPC with high cycles → compute‑bound kernel
+
+Each bottleneck classification produces both a short and long recommendation set tailored to the PMU symptoms. These recommendations highlight the most likely execution‑level fixes, helping engineers stabilise control flow, improve locality, and reduce Python or runtime overhead.
+
+InferPerf also generates a flamegraph for every run. PMU counters tell you *what* is slow; flamegraphs show you *where* the time is spent. Together, they provide a complete picture: microarchitectural symptoms (PMU) and code‑level causes (flamegraph).
+
+---
+
 ## Workloads and Models
 
 InferPerf ships with two **demonstration workloads** to show how the toolkit detects bottlenecks, classifies behaviour, and validates improvements:
@@ -145,7 +162,9 @@ InferPerf is designed around the realities of Arm microarchitecture:
 - **Input regularisation** stabilises branch predictors  
 - **Hot‑path minimisation** concentrates execution in optimised native code paths  
 
----
+InferPerf is intended to complement Arm Performix, rather than compete with it. Performix focuses on operator‑level profiling - it tells you which parts of the model are slow. InferPerf looks at the CPU itself, showing you why the workload is struggling at the microarchitectural level. Used together, they give you the full picture: Performix explains the model’s behaviour, and InferPerf explains the processor’s.
+
+--- 
 
 ## Developer Experience and Reuse
 
@@ -158,7 +177,7 @@ InferPerf is designed around the realities of Arm microarchitecture:
 - Deterministic workloads  
 - ONNX models  
 - Flamegraphs  
-- Baseline cache schema  
+- Baseline cache schema
 
 ---
 
