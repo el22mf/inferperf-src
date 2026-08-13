@@ -133,12 +133,13 @@ def render_metrics(pmu):
     table.add_row("instructions", r_int(pmu.get("instructions")))
     table.add_row("ipc", r3(pmu.get("ipc")))
 
-    #Tokens
-    table.add_row("", "")
-    table.add_row("[bold white]Per-Token Efficiency[/bold white]", "")
-    table.add_row("tokens", r_int(pmu.get("tokens")))
-    table.add_row("cycles_per_token", r_int(pmu.get("cycles_per_token")))
-    table.add_row("instructions_per_token", r_int(pmu.get("instructions_per_token")))
+    # Tokens (only if present)
+    if pmu.get("tokens") is not None:
+        table.add_row("", "")
+        table.add_row("[bold white]Per-Token Efficiency[/bold white]", "")
+        table.add_row("tokens", r_int(pmu.get("tokens")))
+        table.add_row("cycles_per_token", r_int(pmu.get("cycles_per_token")))
+        table.add_row("instructions_per_token", r_int(pmu.get("instructions_per_token")))
 
     # Memory
     table.add_row("", "")
@@ -261,17 +262,21 @@ def run_analyse(workload, args):
 
     workload = load_workload(workload_path)
 
-    if "--warmup" not in args:
+    # Extract warmup from args if provided
+    warmup, clean_args = extract_warmup(args)
+
+    # If user did not provide --warmup, ask interactively
+    if warmup == 0:
         warm = input("\nWarm-up runs [0–3]: ").strip()
-
         if warm not in ("0", "1", "2", "3"):
-            warm = "1"  
+            warm = "1"
+        warmup = int(warm)
 
-    args = ["--warmup", warm]
+    # Rebuild args for PMU run
+    args = ["--warmup", str(warmup)]
 
 
     # 2. Run warmups (if chosen)
-    warmup, clean_args = extract_warmup(args)
 
     if warmup > 0:
         console.print(f"[bold cyan]Running {warmup} warm-up pass(es)...[/bold cyan]")
@@ -324,17 +329,20 @@ def run_analyse(workload, args):
     metadata["batch_size"] = batch
     metadata["sequence_length"] = seq
 
-    if batch and seq:
-        metadata["tokens"] = batch * seq
+    tokens = None
+    if isinstance(batch, int) and isinstance(seq, int):
+        tokens = batch * seq
 
-    tokens = metadata["tokens"]
-    if tokens:
+    metadata["tokens"] = tokens
+
+    if tokens is not None:
         pmu["tokens"] = tokens
         pmu["cycles_per_token"] = pmu["cycles"] / tokens
         pmu["instructions_per_token"] = pmu["instructions"] / tokens
-
-
-
+    else:
+        pmu["tokens"] = None
+        pmu["cycles_per_token"] = None
+        pmu["instructions_per_token"] = None
 
     # 6. Assemble final output
     data = {

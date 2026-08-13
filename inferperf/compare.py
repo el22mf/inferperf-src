@@ -259,24 +259,40 @@ def compare_action_bar():
 # ------------------ main ------------------
 
 def run_compare():
-    if not RICH_AVAILABLE:
-        print("Rich is required for compare.py")
-        return 1
+    args = sys.argv[2:]
 
-    # 1. Workload selection menu
-    print("\nSelect Workload A:\n")
-    workloadA = normalize_workload_path(workload_selection_menu())
+    # Detect CLI workloads
+    cli_workloads = [a for a in args if not a.startswith("--")]
 
-    print("\nSelect Workload B:\n")
-    workloadB = normalize_workload_path(workload_selection_menu())
+    if len(cli_workloads) >= 2:
+        workloadA = normalize_workload_path(cli_workloads[0])
+        workloadB = normalize_workload_path(cli_workloads[1])
+    else:
+        print("\nSelect Workload A:\n")
+        workloadA = normalize_workload_path(workload_selection_menu())
 
+        print("\nSelect Workload B:\n")
+        workloadB = normalize_workload_path(workload_selection_menu())
 
 
     # 2. Warmup if chosen
-    warm = input("\nWarm-up runs [0–3]: ").strip()
-    if warm not in ("0", "1", "2", "3"):
-        warm = "1"
-    warmup = int(warm)
+    # Extract warmup from CLI
+    warmup = 0
+    if "--warmup" in args:
+        idx = args.index("--warmup")
+        if idx + 1 < len(args):
+            try:
+                warmup = int(args[idx + 1])
+            except ValueError:
+                warmup = 1
+
+    # If no warmup provided, ask interactively
+    if warmup == 0:
+        warm = input("\nWarm-up runs [0–3]: ").strip()
+        if warm not in ("0", "1", "2", "3"):
+            warm = "1"
+        warmup = int(warm)
+
 
     # 3. Load workloads
     wA = load_workload(workloadA)

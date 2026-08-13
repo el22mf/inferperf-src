@@ -135,33 +135,31 @@ def format_pct(v):
 
 def render_side_by_side(baseline, current, baseline_meta, current_meta):
     keys = [
-        # Core Execution
         ("cycles", "cycles", "Core Execution"),
         ("instructions", "instructions", None),
         ("ipc", "ipc", None),
+    ]
 
-        # Per-token Efficiency
-        ("tokens", "tokens", "Per-Token Efficiency"),
-        ("cycles_per_token", "cycles_per_token", None),
-        ("instructions_per_token", "instructions_per_token", None),
+    if baseline.get("tokens") is not None and current.get("tokens") is not None:
+        keys.extend([
+            ("tokens", "tokens", "Per-Token Efficiency"),
+            ("cycles_per_token", "cycles_per_token", None),
+            ("instructions_per_token", "instructions_per_token", None),
+        ])
 
-        # Memory Indicators
+    keys.extend([
         ("cache_misses", "cache_misses", "Memory Indicators"),
         ("cache_miss_rate", "cache_miss_rate", None),
         ("l1d_refill", "l1d_refill", None),
         ("l1d_rate", "l1d_rate", None),
         ("l2d_refill", "l2d_refill", None),
         ("l2d_rate", "l2d_rate", None),
-
-        # Branch Indicators
         ("branch_misses", "branch_misses", "Branch Indicators"),
         ("branch_miss_rate", "branch_miss_rate", None),
-
-        # TLB Indicators
         ("dtlb_misses", "dtlb_misses", "TLB Indicators"),
         ("itlb_misses", "itlb_misses", None),
         ("tlb_miss_rate", "tlb_miss_rate", None),
-    ]
+    ])
 
 
     if RICH_AVAILABLE:
@@ -182,6 +180,11 @@ def render_side_by_side(baseline, current, baseline_meta, current_meta):
 
             b = baseline.get(key, 0)
             c = current.get(key, 0)
+
+            if key in ("tokens", "cycles_per_token", "instructions_per_token") and (
+                baseline.get("tokens") is None or current.get("tokens") is None
+            ):
+                continue
 
             # percentage‑point metrics
             if key.endswith("_rate") or key == "ipc":
@@ -312,7 +315,14 @@ def run_validate():
         "all_bottlenecks": cache.get("all_bottlenecks", [])
     }
     baseline_metadata = cache.get("metadata", {})
-    baseline_tokens = baseline_metadata.get("tokens", None)
+    baseline_tokens_raw = baseline_metadata.get("tokens", None)
+
+    # Convert to int only if numeric
+    try:
+        baseline_tokens = int(baseline_tokens_raw)
+    except (TypeError, ValueError):
+        baseline_tokens = None
+
 
     # 2. Display baseline summary
     if RICH_AVAILABLE:
@@ -373,10 +383,14 @@ def run_validate():
         return 6
 
     # Compute per-token metrics for current run using baseline token count
-    if baseline_tokens:
+    if baseline_tokens is not None:
         current_pmu["tokens"] = baseline_tokens
         current_pmu["cycles_per_token"] = current_pmu["cycles"] / baseline_tokens
         current_pmu["instructions_per_token"] = current_pmu["instructions"] / baseline_tokens
+    else:
+        current_pmu["tokens"] = None
+        current_pmu["cycles_per_token"] = None
+        current_pmu["instructions_per_token"] = None
 
     # 5. Classify current run
     current_classification = classify_bottleneck(current_pmu)
