@@ -64,7 +64,7 @@ inferperf validate
 Profiles two workloads independently and presents a side‑by‑side microarchitectural comparison.
 
 ```bash
-inferperf compare
+inferperf compare transformer_encoder transformer_encoder_optimised --warmup 3
 ```
 
 ---
