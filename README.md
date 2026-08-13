@@ -90,7 +90,7 @@ Included ONNX models:
 
 ## Optimisation Impact via Demonstration Workload
 
-<img width="1057" height="689" alt="image" src="https://github.com/user-attachments/assets/f864a166-fea1-46f2-9d73-2674724008fd" />
+<img width="600" height="390" alt="image" src="https://github.com/user-attachments/assets/f864a166-fea1-46f2-9d73-2674724008fd" />
 
 **(a) Workload reduction: 2048 → 128 tokens (16× fewer).**  
 **(b) Execution‑level optimisations: +20.53 IPC uplift and large absolute reductions in cache, TLB, and branch misses.**
