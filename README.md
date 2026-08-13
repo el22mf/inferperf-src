@@ -197,14 +197,12 @@ These events form the core of InferPerf’s bottleneck classifier (IPC, memory l
 InferPerf stores analysis results in a structured cache so future runs can be validated deterministically.  
 This schema is intentionally simple, making it easy to inspect, diff, or integrate into external tooling.
 
-- **workload_name** — identifier for the workload  
-- **timestamp** — when the baseline was generated  
-- **pmu_metrics** — raw PMU totals collected during Analyse  
-- **flamegraph_path** — path to the generated flamegraph  
-- **bottleneck_classification** — InferPerf’s interpretation of the PMU data  
-- **workload_metadata** — deterministic metadata (batch size, sequence length, model name, etc.)
-
-This appendix exists so users can see the **exact data contract** InferPerf provides — useful for reproducibility, auditing, and extending the toolkit.
+- **workload_name** - identifier for the workload  
+- **timestamp** - when the baseline was generated  
+- **pmu_metrics** - raw PMU totals collected during Analyse  
+- **flamegraph_path** - path to the generated flamegraph  
+- **bottleneck_classification** - InferPerf’s interpretation of the PMU data  
+- **workload_metadata** - deterministic metadata (batch size, sequence length, model name, etc.)
 
 ---
 
